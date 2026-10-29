@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Proyecto
+.DS_Store
+local/
+*.pdf
+.serena/
+.claude/
