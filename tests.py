@@ -1,5 +1,6 @@
 """Pruebas de los operadores PFSP. Ejecutar con: python tests.py."""
 
+import os
 import tempfile
 from random import Random
 from statistics import mean, median, stdev
@@ -9,6 +10,7 @@ import numpy as np
 import acs
 import ag
 import eo
+import graficar
 import main
 import operadores as op
 
@@ -341,6 +343,48 @@ def test_resumen_de_corridas():
     assert _campo(fila, "evaluaciones") == 100
     assert _campo(fila, "media_eval_hallazgo") == 100
     assert _campo(fila, "media_tiempo") == 0.3
+
+
+def test_graficos_evaluaciones_log_y_eo():
+    assert set(graficar.ESTILOS) == {"AG", "AM", "ACS", "EO"}
+    with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False) as f:
+        f.write("algoritmo,instancia,semilla,parametros,iteracion,mejor_cmax,rpd,"
+                "tiempo,evaluaciones,mejor_secuencia\n")
+        f.write("AG,datos/tai20_5.txt,1,p,1,10,0,0.1,50,0\n")
+        f.write("EO,datos/tai20_5.txt,1,p,50,12,0,0.1,50,0\n")
+        ruta = f.name
+    curvas = graficar.leer_curvas(ruta)
+    os.unlink(ruta)
+    assert list(curvas["datos/tai20_5.txt"]["AG"]) == [50]
+    assert list(curvas["datos/tai20_5.txt"]["EO"]) == [50]
+
+    capturado = {}
+
+    def savefig(self, *args, **kwargs):
+        ax = self.axes[0]
+        if ax.get_xscale() == "log":
+            capturado["xscale"] = ax.get_xscale()
+            capturado["xlabel"] = ax.get_xlabel()
+            capturado["labels"] = [linea.get_label() for linea in ax.get_lines()]
+        capturado["xticks"] = [tick.get_text() for tick in ax.get_xticklabels()]
+
+    original = graficar.plt.Figure.savefig
+    graficar.plt.Figure.savefig = savefig
+    try:
+        graficar.graficar_instancia(
+            "datos/tai20_5.txt",
+            {"AG": {50: [10], 500: [9]}, "EO": {50: [12], 500: [8]}},
+            8, "salida.png")
+        graficar.graficar_dispersion(
+            "datos/tai20_5.txt",
+            {algoritmo: {50: [10, 11], 100: [9, 10]} for algoritmo in ("AG", "AM", "ACS", "EO")},
+            8, "salida.png")
+    finally:
+        graficar.plt.Figure.savefig = original
+    assert capturado["xscale"] == "log"
+    assert capturado["xlabel"] == "Evaluaciones"
+    assert "EO" in capturado["labels"]
+    assert capturado["xticks"] == ["AG", "AM", "ACS", "EO"]
 
 
 if __name__ == "__main__":
