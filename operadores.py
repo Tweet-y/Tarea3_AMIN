@@ -42,7 +42,7 @@ def rpd(cmax, ub):
 
 
 CABECERA_CSV = ["algoritmo", "instancia", "semilla", "parametros", "iteracion",
-                "mejor_cmax", "rpd", "tiempo", "mejor_secuencia"]
+                "mejor_cmax", "rpd", "tiempo", "evaluaciones", "mejor_secuencia"]
 
 
 def guardar_csv(ruta, filas):

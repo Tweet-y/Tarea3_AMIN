@@ -205,6 +205,33 @@ def test_busqueda_local_insercion():
         assert cmax == op.makespan(mejorada, p) < op.makespan(inicial, p)
 
 
+def test_evaluaciones_y_tiempo_cpu():
+    """AG: tam evaluaciones por generacion. AM suma n^2+1 por busqueda local.
+    ACS: una evaluacion por hormiga. El reloj es time.process_time (CPU)."""
+    col_eval = op.CABECERA_CSV.index("evaluaciones")
+    col_tiempo = op.CABECERA_CSV.index("tiempo")
+    n = len(P_CHICA)
+    costo_bl = n * n + 1
+
+    _, _, ag_filas = ag.ejecutar_ag(P_CHICA, 8, "toy", 1, 4, 3, 0.8, 0.1)
+    assert [fila[col_eval] for fila in ag_filas] == [4, 8, 12]
+
+    _, _, am_filas = ag.ejecutar_ag(P_CHICA, 8, "toy", 1, 4, 3, 0.8, 0.1, frec_bl=2)
+    assert [fila[col_eval] for fila in am_filas] == [4, 8 + costo_bl, 12 + costo_bl]
+
+    _, _, acs_filas = acs.ejecutar_acs(P_CHICA, 8, "toy", 1, 3, 2, 0.1, 1.0, 0.9)
+    assert [fila[col_eval] for fila in acs_filas] == [3, 6]
+
+    marcas = iter([100.0, 100.25, 100.5])
+    reloj = ag.process_time
+    ag.process_time = lambda: next(marcas)
+    try:
+        _, _, filas = ag.ejecutar_ag(P_CHICA, 8, "toy", 1, 2, 2, 1.0, 0.0)
+    finally:
+        ag.process_time = reloj
+    assert [fila[col_tiempo] for fila in filas] == [0.25, 0.5]
+
+
 def test_am_reproducible_y_mejora():
     p, ub = op.leer_instancia("datos/tai20_5.txt")
     sec, cmax, filas = ag.ejecutar_ag(p, ub, "tai20_5", 7, 20, 30, 0.8, 0.1, frec_bl=5)

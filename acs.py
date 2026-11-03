@@ -6,7 +6,7 @@ Uso: python acs.py instancia semilla hormigas iteraciones alfa beta q0 salida.cs
 import argparse
 import os
 from random import Random
-from time import perf_counter
+from time import process_time
 
 import operadores as op
 
@@ -14,8 +14,9 @@ import operadores as op
 def ejecutar_acs(p, ub, instancia, semilla, hormigas, iteraciones, alfa, beta, q0,
                  mostrar_progreso=False):
     """Ejecuta ACS y devuelve (mejor_secuencia, mejor_cmax, filas), con una fila CSV por iteracion."""
-    inicio = perf_counter()
+    inicio = process_time()
     rng = Random(semilla)
+    evaluaciones = 0
     parametros = f"hormigas={hormigas} alfa={alfa} beta={beta} q0={q0}"
 
     # Inicializar
@@ -29,6 +30,7 @@ def ejecutar_acs(p, ub, instancia, semilla, hormigas, iteraciones, alfa, beta, q
             # Construir solucion (incluye actualizacion local) y evaluarla
             secuencia = op.construir_secuencia(tau, eta, beta, q0, alfa, tau0, rng)
             cmax = op.makespan(secuencia, p)
+            evaluaciones += 1
             # Actualizar mejor solucion
             if cmax < mejor_cmax:
                 mejor_sec, mejor_cmax = secuencia, cmax
@@ -36,9 +38,9 @@ def ejecutar_acs(p, ub, instancia, semilla, hormigas, iteraciones, alfa, beta, q
         # Actualizar feromonas (global, sobre la mejor solucion)
         op.actualizar_global(tau, mejor_sec, mejor_cmax, alfa)
 
-        tiempo = perf_counter() - inicio
+        tiempo = process_time() - inicio
         filas.append(["ACS", instancia, semilla, parametros, iteracion, mejor_cmax,
-                      round(op.rpd(mejor_cmax, ub), 4), round(tiempo, 4),
+                      round(op.rpd(mejor_cmax, ub), 4), round(tiempo, 4), evaluaciones,
                       "-".join(map(str, mejor_sec))])
         if mostrar_progreso and iteracion % max(1, iteraciones // 10) == 0:
             print(f"  Iteracion {iteracion:>5}/{iteraciones}  mejor Cmax = {mejor_cmax}")

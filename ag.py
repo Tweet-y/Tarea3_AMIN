@@ -6,7 +6,7 @@ Uso: python ag.py instancia semilla poblacion iteraciones pc pm salida.csv
 import argparse
 import os
 from random import Random
-from time import perf_counter
+from time import process_time
 
 import operadores as op
 
@@ -17,8 +17,9 @@ def ejecutar_ag(p, ub, instancia, semilla, tam_poblacion, iteraciones, pc, pm, f
 
     frec_bl > 0 lo convierte en AM: busqueda local sobre el mejor individuo cada frec_bl iteraciones.
     """
-    inicio = perf_counter()
+    inicio = process_time()
     rng = Random(semilla)
+    evaluaciones = 0
     algoritmo = "AM" if frec_bl else "AG"
     parametros = f"poblacion={tam_poblacion} pc={pc} pm={pm}" + (f" frec_bl={frec_bl}" if frec_bl else "")
 
@@ -40,6 +41,7 @@ def ejecutar_ag(p, ub, instancia, semilla, tam_poblacion, iteraciones, pc, pm, f
                 hijo = op.mutacion_insercion(hijo, rng)
             hijos.append(hijo)
         cmax_hijos = [op.makespan(s, p) for s in hijos]
+        evaluaciones += tam_poblacion
 
         # Reemplazo generacional con elitismo: el mejor historico sustituye al peor hijo
         peor = max(range(tam_poblacion), key=lambda i: cmax_hijos[i])
@@ -50,11 +52,12 @@ def ejecutar_ag(p, ub, instancia, semilla, tam_poblacion, iteraciones, pc, pm, f
         mejor = min(range(tam_poblacion), key=lambda i: cmax[i])
         if frec_bl and iteracion % frec_bl == 0:
             poblacion[mejor], cmax[mejor] = op.busqueda_local_insercion(poblacion[mejor], p)
+            evaluaciones += len(p) ** 2 + 1
         mejor_sec, mejor_cmax = poblacion[mejor], cmax[mejor]
 
-        tiempo = perf_counter() - inicio
+        tiempo = process_time() - inicio
         filas.append([algoritmo, instancia, semilla, parametros, iteracion, mejor_cmax,
-                      round(op.rpd(mejor_cmax, ub), 4), round(tiempo, 4),
+                      round(op.rpd(mejor_cmax, ub), 4), round(tiempo, 4), evaluaciones,
                       "-".join(map(str, mejor_sec))])
         if mostrar_progreso and iteracion % max(1, iteraciones // 10) == 0:
             print(f"  Iteracion {iteracion:>5}/{iteraciones}  mejor Cmax = {mejor_cmax}")
