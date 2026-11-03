@@ -2,12 +2,14 @@
 
 import tempfile
 from random import Random
+from statistics import mean, median, stdev
 
 import numpy as np
 
 import acs
 import ag
 import eo
+import main
 import operadores as op
 
 
@@ -291,6 +293,54 @@ def test_eo_reproducible_y_monotono():
     historial = [fila[5] for fila in filas]
     assert historial[-1] == cmax
     assert all(a >= b for a, b in zip(historial, historial[1:]))
+
+
+def _campo(fila, nombre):
+    return fila[main.CABECERA_RESUMEN.index(nombre)]
+
+
+def test_tareas_incluyen_eo():
+    tareas = main.construir_tareas(2)
+    assert len(tareas) == 4 * 3 * 2
+    assert tareas[0] == ("AG", "datos/tai20_5.txt", 1)
+    assert {alg for alg, _, _ in tareas} == {"AG", "AM", "ACS", "EO"}
+    assert {semilla for _, _, semilla in tareas} == {1, 2}
+
+
+def test_referencias_spt_y_azar():
+    filas = main.filas_referencia(P_CHICA, 8, "toy")
+    assert [_campo(f, "algoritmo") for f in filas] == ["SPT", "aleatoria"]
+    spt = list(np.argsort(P_CHICA.sum(axis=1), kind="stable"))
+    assert _campo(filas[0], "mejor_cmax") == op.makespan(spt, P_CHICA)
+    assert _campo(filas[0], "evaluaciones") == 1
+    assert "argsort" in _campo(filas[0], "nota")
+    rng = Random(0)
+    muestra = [op.makespan(rng.sample(range(3), 3), P_CHICA) for _ in range(1000)]
+    assert _campo(filas[1], "media_cmax") == round(mean(muestra), 1)
+    assert _campo(filas[1], "evaluaciones") == 1000
+    assert "Random(0)" in _campo(filas[1], "nota")
+
+
+def test_resumen_de_corridas():
+    filas1 = [
+        ["AG", "toy", 1, "p", 1, 12, 50.0, 0.1, 50, "a"],
+        ["AG", "toy", 1, "p", 2, 10, 25.0, 0.2, 100, "b"],
+    ]
+    filas2 = [
+        ["AG", "toy", 2, "p", 1, 9, 12.5, 0.3, 50, "c"],
+        ["AG", "toy", 2, "p", 2, 8, 0.0, 0.4, 100, "d"],
+    ]
+    fila = main.resumir("toy", "AG", 8, [filas1, filas2])
+    assert _campo(fila, "mejor_cmax") == 8
+    assert _campo(fila, "media_cmax") == 9
+    assert _campo(fila, "desv_cmax") == round(stdev([10, 8]), 1)
+    assert _campo(fila, "media_rpd") == 12.5
+    assert _campo(fila, "mediana_rpd") == round(median([25.0, 0.0]), 2)
+    assert _campo(fila, "min_rpd") == 0 and _campo(fila, "max_rpd") == 25
+    assert _campo(fila, "n_ub") == 1
+    assert _campo(fila, "evaluaciones") == 100
+    assert _campo(fila, "media_eval_hallazgo") == 100
+    assert _campo(fila, "media_tiempo") == 0.3
 
 
 if __name__ == "__main__":
