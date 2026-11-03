@@ -36,6 +36,48 @@ def makespan(secuencia, p):
     return C[-1]
 
 
+def ocio_por_posicion(secuencia, p):
+    """Cmax y el ocio que induce cada posicion.
+
+    o_i = sum_{j=2..m} max(0, C(i, j-1) - C(i-1, j)). Antes de actualizar la
+    maquina j, C[j] sigue siendo C(i-1, j) y C[j-1] ya es C(i, j-1).
+    """
+    C = [0] * p.shape[1]
+    ocio = []
+    for tiempos in p[secuencia].tolist():
+        C[0] += tiempos[0]
+        o = 0
+        for j in range(1, len(C)):
+            o += max(0, C[j - 1] - C[j])
+            C[j] = max(C[j], C[j - 1]) + tiempos[j]
+        ocio.append(o)
+    return C[-1], ocio
+
+
+def pesos_potencia(n, tau):
+    """Pesos acumulados de P(k) proporcional a k^{-tau}, con k = 1..n."""
+    acum = []
+    total = 0.0
+    for k in range(1, n + 1):
+        total += k ** (-tau)
+        acum.append(total)
+    return acum
+
+
+def paso_eo(secuencia, ocio, acum, rng):
+    """Mueve el trabajo de una posicion elegida con P(k) ~ k^{-tau}.
+
+    k = 1 es el mayor ocio. Los empates se rompen al azar. El trabajo se inserta
+    en otra posicion, el mismo vecindario que la mutacion del AG.
+    """
+    orden = sorted(range(len(secuencia)), key=lambda i: (-ocio[i], rng.random()))
+    origen = rng.choices(orden, cum_weights=acum)[0]
+    destino = rng.choice([j for j in range(len(secuencia)) if j != origen])
+    nueva = list(secuencia)
+    nueva.insert(destino, nueva.pop(origen))
+    return nueva
+
+
 def rpd(cmax, ub):
     """Desviacion porcentual relativa respecto de la mejor cota conocida."""
     return 100 * (cmax - ub) / ub

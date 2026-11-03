@@ -7,6 +7,7 @@ import numpy as np
 
 import acs
 import ag
+import eo
 import operadores as op
 
 
@@ -240,6 +241,55 @@ def test_am_reproducible_y_mejora():
     assert sorted(sec) == list(range(20)) and op.makespan(sec, p) == cmax
     assert filas[0][0] == "AM" and "frec_bl=5" in filas[0][3]
     historial = [fila[5] for fila in filas]
+    assert all(a >= b for a, b in zip(historial, historial[1:]))
+
+
+def test_ocio_por_posicion():
+    # 3x2. Secuencia [0, 1, 2]:
+    # pos0: M1=2, ocio=max(0,2-0)=2, M2=3.
+    # pos1: M1=12, ocio=max(0,12-3)=9, M2=13.
+    # pos2: M1=13, ocio=max(0,13-13)=0, M2=16.
+    p = np.array([[2, 1], [10, 1], [1, 3]])
+    cmax, ocio = op.ocio_por_posicion([0, 1, 2], p)
+    assert cmax == 16 and ocio == [2, 9, 0]
+    assert cmax == op.makespan([0, 1, 2], p)
+
+    # 3x3, para que el ocio sume mas de una maquina.
+    # pos0: ocios 1+3. pos1: 2+0. pos2: 0+4. Cmax=12.
+    p3 = np.array([[1, 2, 3], [4, 1, 1], [1, 5, 1]])
+    cmax3, ocio3 = op.ocio_por_posicion([0, 1, 2], p3)
+    assert cmax3 == 12 and ocio3 == [4, 2, 4]
+    assert cmax3 == op.makespan([0, 1, 2], p3)
+
+
+def test_pesos_potencia():
+    # k^{-1} para k=1,2,3: 1, 1/2, 1/3.
+    assert np.allclose(op.pesos_potencia(3, 1), [1, 1.5, 1.5 + 1 / 3])
+
+
+def test_paso_eo_es_permutacion():
+    secuencia = [0, 1, 2, 3]
+    ocio = [1, 5, 0, 5]
+    acum = op.pesos_potencia(4, 1.4)
+    rng = Random(0)
+    for _ in range(30):
+        nueva = op.paso_eo(secuencia, ocio, acum, rng)
+        assert sorted(nueva) == secuencia and nueva != secuencia
+
+
+def test_eo_reproducible_y_monotono():
+    p, ub = op.leer_instancia("datos/tai20_5.txt")
+    sec, cmax, filas = eo.ejecutar_eo(p, ub, "tai20_5", 7, 100, 1.4)
+    sec2, cmax2, filas2 = eo.ejecutar_eo(p, ub, "tai20_5", 7, 100, 1.4)
+    assert sec == sec2 and cmax == cmax2
+    assert [fila[9] for fila in filas] == [fila[9] for fila in filas2]
+    assert sorted(sec) == list(range(20)) and op.makespan(sec, p) == cmax
+    assert [fila[0] for fila in filas] == ["EO", "EO"]
+    assert [fila[4] for fila in filas] == [50, 100]
+    assert [fila[8] for fila in filas] == [50, 100]
+    assert "tau=1.4" in filas[0][3]
+    historial = [fila[5] for fila in filas]
+    assert historial[-1] == cmax
     assert all(a >= b for a, b in zip(historial, historial[1:]))
 
 
