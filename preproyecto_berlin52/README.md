@@ -38,7 +38,7 @@ Tarea2_AMIN/
 Desarrollado en Python 3.9+. Requiere `numpy` para cálculo vectorizado y `matplotlib` para visualización:
 
 ```bash
-pip install numpy matplotlib
+pip install -r ../requirements.txt
 ```
 
 ---

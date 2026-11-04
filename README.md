@@ -15,7 +15,7 @@ Comparación de cuatro metaheurísticas sobre el *Permutation Flow Shop Scheduli
 Python 3.10 o superior, con numpy y matplotlib (este último solo para `graficar.py`).
 
 ```bash
-pip install numpy matplotlib
+pip install -r requirements.txt
 ```
 
 ## Estructura
@@ -30,6 +30,7 @@ operadores.py    Lectura, Cmax, ocio, RPD, CSV y operadores
 tests.py         Pruebas de operadores, AG, AM, ACS, EO, resumen y gráficos
 graficar.py      Convergencia (evaluaciones, escala log) y boxplots
 slurm.sh         Job opcional de Slurm para la batería completa
+requirements.txt Dependencias: numpy y matplotlib
 datos/           Instancias de Taillard: tai20_5, tai50_10, tai100_10
 resultados/      CSV de corridas y resumen
 graficos/        Convergencia y dispersión por instancia (PNG)
