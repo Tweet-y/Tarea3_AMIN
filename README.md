@@ -91,7 +91,7 @@ AG, AM y ACS escriben una fila por iteración. EO escribe una cada 50 iteracione
 | `instancia`, `semilla`, `parametros` | Configuración de la corrida |
 | `iteracion` | Generación, ciclo o iteración de EO en la que se registró la fila |
 | `mejor_cmax` | Mejor makespan encontrado hasta esa fila |
-| `rpd` | $100 \cdot (C_{max} - UB) / UB$ |
+| `rpd` | $100 \cdot (C_{max} - UB) / UB$. UB es la mejor cota publicada (`COTAS` en `operadores.py`: 1278, 2991 y 5770), no la cabecera del archivo de tai50_10 (3025) |
 | `tiempo` | Segundos de CPU (`time.process_time`) desde el inicio |
 | `evaluaciones` | Makespans acumulados. AG: 50 por generación. AM: eso más $n^2+1$ por búsqueda local. ACS: una por hormiga. EO: una por iteración |
 | `mejor_secuencia` | Trabajos separados por `-`, numerados desde 0 |
@@ -206,7 +206,7 @@ queda en la mejor si reduce el $C_{max}$.
 
 ## Resultados del Proyecto 2
 
-Estas cifras son la batería anterior: semillas 1 a 10, sin EO. El Proyecto 3 las vuelve
+Estas cifras son la batería anterior: semillas 1 a 10, sin EO, y con la UB de la cabecera (3025 en tai50_10). El Proyecto 3 las vuelve
 a calcular con 30 semillas y agrega EO; la tabla nueva sale de `resultados/resumen.csv`
 después de `slurm.sh`.
 

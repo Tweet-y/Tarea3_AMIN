@@ -6,11 +6,17 @@ import os
 import numpy as np
 
 
+# Mejor cota publicada (resumen de Taillard del 3 de junio de 2026: LB = UB). Reemplaza a la
+# cabecera del archivo, que en tai50_10 sigue en 3025.
+COTAS = {"tai20_5": 1278, "tai50_10": 2991, "tai100_10": 5770}
+
+
 def leer_instancia(ruta):
     """Lee una instancia de Taillard.
 
     Archivo: cabecera `n m semilla UB LB` y luego m filas de n tiempos (una por maquina).
     Retorna (p, ub), con p[i, j] = tiempo del trabajo i en la maquina j (forma n x m).
+    ub es la cota de COTAS si la instancia esta ahi; si no, la de la cabecera.
     """
     with open(ruta, encoding="utf-8") as f:
         n, m, _, ub, _ = (int(x) for x in f.readline().split())
@@ -20,7 +26,8 @@ def leer_instancia(ruta):
             f"{ruta}: la cabecera indica {n} trabajos x {m} maquinas, "
             f"pero se leyeron {p.shape[0]} x {p.shape[1]} tiempos."
         )
-    return p, ub
+    nombre = os.path.splitext(os.path.basename(ruta))[0]
+    return p, COTAS.get(nombre, ub)
 
 
 def makespan(secuencia, p):

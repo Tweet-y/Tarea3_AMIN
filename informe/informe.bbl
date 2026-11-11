@@ -35,6 +35,13 @@ J.~Gmys, ``Exactly solving hard permutation flowshop scheduling problems on
   peta-scale {GPU}-accelerated supercomputers,'' \emph{INFORMS Journal on
   Computing}, vol.~34, no.~5, pp. 2502--2522, 2022.
 
+\bibitem{taillard_bounds_2026}
+E.~Taillard, ``Summary of best known lower and upper bounds for {Taillard}'s
+  permutation flow shop instances,''
+  \url{https://mistic.iict-heig-vd.ch/taillard/problemes.dir/ordonnancement.dir/flowshop.dir/best_lb_up.txt},
+  2026, archivo actualizado el 3 de junio de 2026. Un solo n{\'u}mero indica
+  que la cota inferior y la superior coinciden.
+
 \bibitem{nawaz_heuristic_1983}
 M.~Nawaz, E.~E. Enscore, and I.~Ham, ``A heuristic algorithm for the m-machine,
   n-job flow-shop sequencing problem,'' \emph{Omega}, vol.~11, no.~1, pp.
@@ -81,22 +88,6 @@ S.~Boettcher and A.~Percus, ``Nature's way of optimizing,'' \emph{Artificial
 S.~Boettcher and A.~G. Percus, ``Optimization with extremal dynamics,''
   \emph{Physical Review Letters}, vol.~86, no.~23, pp. 5211--5214, 2001.
 
-\bibitem{equipo_ag_neh_2026}
-C.~Alvarado, B.~Bizama, and B.~Jeldres, ``Algoritmo genético y algoritmo
-  memético para el {PFSP}, con siembra {NEH},'' Informe de curso, Algoritmos
-  Metaheurísticos Inspirados en la Naturaleza, Universidad Católica de la
-  Santísima Concepción, 2026.
-
-\bibitem{equipo_acs_tsp_2026}
-------, ``Ant {Colony} {System} para {Berlin52},'' Preproyecto de curso,
-  Algoritmos Metaheurísticos Inspirados en la Naturaleza, Universidad
-  Católica de la Santísima Concepción, 2026.
-
-\bibitem{bak_punctuated_1993}
-P.~Bak and K.~Sneppen, ``Punctuated equilibrium and criticality in a simple
-  model of evolution,'' \emph{Physical Review Letters}, vol.~71, no.~24, pp.
-  4083--4086, 1993.
-
 \bibitem{brunner_permutation_2025}
 O.~Brunner, ``Permutation flow-shop: {Taillard} and {VFR} benchmarks best known
   solutions,'' 2025.
@@ -105,5 +96,15 @@ O.~Brunner, ``Permutation flow-shop: {Taillard} and {VFR} benchmarks best known
 L.~Davis, ``Applying adaptive algorithms to epistatic domains,'' in
   \emph{Proceedings of the 9th International Joint Conference on Artificial
   Intelligence (IJCAI)}, 1985, pp. 162--164.
+
+\bibitem{codigo_comparacion_2026}
+C.~Alvarado, B.~Bizama, and B.~Jeldres, ``Implementación de la comparación
+  entre {AG}, {AM}, {ACS} y {EO},''
+  \url{https://github.com/Tweet-y/Tarea3_AMIN}, 2026.
+
+\bibitem{ruiz_iterated_2007}
+R.~Ruiz and T.~St{\"u}tzle, ``A simple and effective iterated greedy algorithm
+  for the permutation flowshop scheduling problem,'' \emph{European Journal of
+  Operational Research}, vol. 177, no.~3, pp. 2033--2049, 2007.
 
 \end{thebibliography}

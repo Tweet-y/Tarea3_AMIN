@@ -16,7 +16,7 @@ import operadores as op
 
 
 def test_leer_instancia():
-    for nombre, n, m, ub in [("tai20_5", 20, 5, 1278), ("tai50_10", 50, 10, 3025),
+    for nombre, n, m, ub in [("tai20_5", 20, 5, 1278), ("tai50_10", 50, 10, 2991),
                              ("tai100_10", 100, 10, 5770)]:
         p, cota = op.leer_instancia(f"datos/{nombre}.txt")
         assert p.shape == (n, m)
@@ -385,6 +385,12 @@ def test_graficos_evaluaciones_log_y_eo():
     assert capturado["xlabel"] == "Evaluaciones"
     assert "EO" in capturado["labels"]
     assert capturado["xticks"] == ["AG", "AM", "ACS", "EO"]
+
+
+def test_cota_referencia_ta041():
+    """La cota de ta041 es la vigente (2991), no la cabecera vieja (3025)."""
+    assert int(open("datos/tai50_10.txt").readline().split()[3]) == 3025
+    assert op.leer_instancia("datos/tai50_10.txt")[1] == 2991
 
 
 if __name__ == "__main__":
