@@ -34,7 +34,6 @@ requirements.txt Dependencias: numpy y matplotlib
 datos/           Instancias de Taillard: tai20_5, tai50_10, tai100_10
 resultados/      CSV de corridas y resumen
 graficos/        Convergencia y dispersión por instancia (PNG)
-preproyecto_berlin52/  Preproyecto: ACS sobre TSP Berlin52
 ```
 
 Los scripts de cada algoritmo describen **qué** hace. `operadores.py` describe **cómo**.
