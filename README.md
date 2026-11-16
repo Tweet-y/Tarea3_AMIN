@@ -107,8 +107,8 @@ python graficar.py resultados/experimentos.csv
 ```
 
 `python main.py --semillas 1` es una prueba corta: 4 algoritmos × 3 instancias × 1 semilla.
-Reemplaza `resultados/experimentos.csv` y `resultados/resumen.csv`. La corrida del
-informe es la de `slurm.sh` (30 semillas).
+Reemplaza `resultados/experimentos.csv` y `resultados/resumen.csv`. La corrida completa
+es la de `slurm.sh` (30 semillas, 360 corridas).
 
 - `main.py --semillas N` usa las semillas 1 a N (por defecto 30) y un
   `ProcessPoolExecutor`. `--procesos` vale, por defecto, las CPUs asignadas al proceso
@@ -164,9 +164,10 @@ ACS: $\alpha$ = 0.1, $\beta$ = 1.0, q0 = 0.9.
 - Mutación por inserción.
 - Reemplazo generacional con elitismo: el mejor histórico reemplaza al peor hijo.
 
-**AM:** el mismo AG. Cada `frec_bl` generaciones aplica al mejor individuo una pasada
-de búsqueda local por inserción: cada trabajo se prueba en todas las posiciones y
-queda en la mejor si reduce el $C_{max}$.
+**AM:** el mismo AG. Cada `frec_bl` generaciones, después del elitismo, aplica al mejor
+individuo una pasada secuencial de inserción. Los trabajos se recorren en el orden de
+la secuencia de entrada. Cada uno se prueba en todas las posiciones de la secuencia ya
+modificada por los anteriores y se deja en la de menor $C_{max}$ solo si ese valor baja.
 
 **ACS:**
 - **Grafo:** trabajo → trabajo. $\tau_{ij}$ es la deseabilidad de programar $j$
@@ -201,40 +202,50 @@ queda en la mejor si reduce el $C_{max}$.
 - **Elitismo de 1:** es lo mínimo para que el mejor Cmax del AG nunca empeore.
 - **SPT, no NEH reducida:** con NEH no se distinguiría su aporte del de la colonia.
 - **Refuerzo con la mejor global:** es la forma original del ACS (Dorigo y Gambardella, 1997).
-- **$\tau = 1.4$:** es el valor del ejemplo de ejecución del enunciado. No se barrió $\tau$.
+- **$\tau = 1.4$:** un solo exponente para las tres instancias. $1 + 1/\ln n$ da cerca de
+  1.33, 1.26 y 1.22 para $n = 20$, 50 y 100; 1.4 es más ávido. No se barrió $\tau$.
 
-## Resultados del Proyecto 2
+## Resultados
 
-Estas cifras son la batería anterior: semillas 1 a 10, sin EO, y con la UB de la cabecera (3025 en tai50_10). El Proyecto 3 las vuelve
-a calcular con 30 semillas y agrega EO; la tabla nueva sale de `resultados/resumen.csv`
-después de `slurm.sh`.
+Cifras de `resultados/resumen.csv`: 30 semillas, cuatro algoritmos, cotas 1278, 2991 y 5770.
+El RPD de tai50_10 usa 2991, no el 3025 de la cabecera del archivo.
 
 | Instancia | Alg | Mejor | Media ± desv | RPD medio | Tiempo medio |
 | :--- | :---: | ---: | ---: | ---: | ---: |
-| tai20_5 (UB 1278) | AG | 1297 | 1297.0 ± 0.0 | 1.49 % | 0.45 s |
-| | AM | 1278 | 1295.1 ± 6.0 | 1.34 % | 0.66 s |
-| | ACS | 1297 | 1316.3 ± 13.1 | 3.00 % | 1.58 s |
-| tai50_10 (UB 3025) | AG | 3122 | 3195.7 ± 34.5 | 5.64 % | 1.39 s |
-| | AM | 3070 | 3123.0 ± 29.4 | 3.24 % | 7.48 s |
-| | ACS | 3446 | 3467.2 ± 18.8 | 14.62 % | 5.14 s |
-| tai100_10 (UB 5770) | AG | 5970 | 6049.8 ± 57.0 | 4.85 % | 2.79 s |
-| | AM | 5826 | 5855.5 ± 28.0 | 1.48 % | 52.70 s |
-| | ACS | 6304 | 6330.8 ± 14.4 | 9.72 % | 12.62 s |
+| tai20_5 (1278) | AG | 1297 | 1297.8 ± 4.6 | 1.55 % | 1.16 s |
+| | AM | 1278 | 1295.7 ± 6.2 | 1.38 % | 1.82 s |
+| | ACS | 1297 | 1320.0 ± 12.5 | 3.28 % | 9.00 s |
+| | EO | 1303 | 1324.1 ± 10.9 | 3.60 % | 1.67 s |
+| tai50_10 (2991) | AG | 3122 | 3199.1 ± 28.5 | 6.96 % | 3.92 s |
+| | AM | 3070 | 3133.1 ± 27.2 | 4.75 % | 21.18 s |
+| | ACS | 3362 | 3453.0 ± 35.2 | 15.45 % | 27.70 s |
+| | EO | 3378 | 3445.2 ± 33.7 | 15.19 % | 7.52 s |
+| tai100_10 (5770) | AG | 5967 | 6048.9 ± 53.2 | 4.83 % | 8.01 s |
+| | AM | 5811 | 5849.8 ± 28.4 | 1.38 % | 147.58 s |
+| | ACS | 6277 | 6337.7 ± 29.5 | 9.84 % | 60.07 s |
+| | EO | 6339 | 6418.3 ± 43.8 | 11.24 % | 13.89 s |
 
-- El AM obtiene el menor RPD en las tres instancias y alcanza el UB en tai20_5. Su costo
-  es el tiempo: en tai100_10 la búsqueda local multiplica unas 19 veces el tiempo del AG.
-- ACS es el más estable entre semillas en 50×10 y 100×10, pero converge temprano a
-  soluciones peores. La visibilidad SPT sola da secuencias con 15–25 % de RPD, así que
-  orienta poco hacia un buen makespan.
+- Entre los cuatro métodos, el AM tiene el menor RPD medio en las tres instancias. En
+  tai20_5 iguala 1278 en 2 de 30 semillas. También es el que más evalúa: en tai100_10
+  hace 210 020 evaluaciones y tarda 147.58 s; el AG hace 10 000 y tarda 8.01 s. Una pasada
+  de búsqueda local en ese tamaño cuesta 10 001 evaluaciones, más que el presupuesto base.
+  La mejor calidad y el costo extra se observan juntos; no se separó cuánto viene de cada uno.
+- ACS y EO, con las mismas 10 000 evaluaciones que el AG, quedan por encima en RPD.
+  SPT queda en 15.18 %, 26.41 % y 18.25 %, cerca de la media de 1 000 permutaciones
+  al azar (18.64 %, 28.26 % y 20.00 %).
 
-**Decisiones de parámetros:** el presupuesto 50×200, pc, pm, frec_bl y q0 son los valores
-del ejemplo del enunciado (q0 = 0.9 es también el valor de Dorigo y Gambardella) y no se
-calibraron. Solo cambian dos:
-- **β = 1.0 en lugar de 2.0.** Con 5 semillas en tai20_5, el RPD medio fue:
+**Parámetros.** El presupuesto 50×200, pc = 0.8, pm = 0.1, frec_bl = 10, q0 = 0.9 y
+α = 0.1 se fijaron a priori y no se calibraron de forma sistemática. q0 = 0.9 es también
+el valor de Dorigo y Gambardella. pc = 0.8 deja la mayor parte de los hijos al cruce;
+pm = 0.1 mueve cerca de un hijo de cada diez. Con α = 1 cada actualización reemplazaría
+la feromona de la arista.
 
-  | β | 0 | 1 | 2 | 5 |
-  | :--- | :---: | :---: | :---: | :---: |
-  | RPD medio | 3.19 % | 2.90 % | 3.35 % | 5.60 % |
+β = 1.0 se eligió en tai20_5 con cinco semillas; el listado no quedó archivado. El RPD
+medio de ese ensayo fue:
 
-- **α = 0.1 en lugar de 1.0.** Con α = 1 cada actualización reemplazaría toda la feromona
-  acumulada y ACS perdería su memoria.
+| β | 0 | 1 | 2 | 5 |
+| :--- | :---: | :---: | :---: | :---: |
+| RPD medio | 3.19 % | 2.90 % | 3.35 % | 5.60 % |
+
+En las 30 semillas el ACS de tai20_5 queda en 3.28 %, peor que el 2.90 % del ensayo.
+Elegir β en una instancia que después se reporta favorece levemente al ACS en 20×5.
